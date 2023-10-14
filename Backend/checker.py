@@ -1,5 +1,5 @@
 # Create a Python script to inspect model.py
-with open('/Users/jashparekh/Documents/GitHub/Dermalize/Backend/model.py', 'r') as f:
+with open('/Users/jashparekh/Documents/GitHub/dermalize/Backend/model.py', 'r') as f:
     content = f.read()
 
 # Execute the content to get class names
