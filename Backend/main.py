@@ -1,10 +1,10 @@
-import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import transforms, datasets
-from model import SkinNet  # Import the model from model.py
+from model import SkinNet
+from data_processor import SkinDiseaseApp
 
 # Define data directories
 train_dir = '/Users/jashparekh/Documents/GitHub/Dermalize/Backend/dermnet/train'
@@ -14,12 +14,14 @@ test_dir = '/Users/jashparekh/Documents/GitHub/Dermalize/Backend/dermnet/test'
 num_classes = 23
 learning_rate = 0.001
 batch_size = 64
-num_epochs = 10
+num_epochs = 1
+
+
 
 # Image transforms
 data_transforms = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
+    transforms.RandomResizedCrop(224),  # Data augmentation - random crop
+    transforms.RandomHorizontalFlip(),  # Data augmentation - random horizontal flip
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
@@ -72,3 +74,36 @@ with torch.no_grad():
         correct += (predicted == labels).sum().item()
 
 print(f'Accuracy on the test set: {100 * correct / total}%')
+
+# Test the model using SkinDiseaseApp
+app = SkinDiseaseApp('skin_model.pth')
+image_path = "/Users/jashparekh/Documents/GitHub/Dermalize/Backend/acne.jpeg"
+predicted_class = app.predict_skin_disease(image_path)
+
+predicted_class = [
+    "Acne and Rosacea Photos",
+    "Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions",
+    "Atopic Dermatitis Photos",
+    "Bullous Disease Photos",
+    "Cellulitis Impetigo and other Bacterial Infections",
+    "Eczema Photos",
+    "Exanthems and Drug Eruptions",
+    "Hair Loss Photos Alopecia and other Hair Diseases",
+    "Herpes HPV and other STDs Photos",
+    "Light Diseases and Disorders of Pigmentation",
+    "Lupus and other Connective Tissue diseases",
+    "Melanoma Skin Cancer Nevi and Moles",
+    "Nail Fungus and other Nail Disease",
+    "Poison Ivy Photos and other Contact Dermatitis",
+    "Psoriasis pictures Lichen Planus and related diseases",
+    "Scabies Lyme Disease and other Infestations and Bites",
+    "Seborrheic Keratoses and other Benign Tumors",
+    "Systemic Disease",
+    "Tinea Ringworm Candidiasis and other Fungal Infections",
+    "Urticaria Hives",
+    "Vascular Tumors",
+    "Vasculitis Photos",
+    "Warts Molluscum and other Viral Infections"
+]
+
+print(f'Predicted class: {predicted_class}')
