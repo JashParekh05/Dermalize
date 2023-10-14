@@ -1,80 +1,36 @@
+import tensorflow as tf
+import numpy as np
+import cv2
 import os
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader
-from torchvision import transforms, datasets, models
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.layers import Input, Dense, Flatten
+from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.utils import to_categorical
 
-# Define data directories
-train_dir = '/Users/jashparekh/Documents/GitHub/Dermalize/Backend/dermnet/train'
-test_dir = '/Users/jashparekh/Documents/GitHub/Dermalize/Backend/dermnet/test'
+# Define the class names
+class_names = ["Acne", "Eczema", "Atopic", "Psoriasis", "Tinea", "Vitiligo"]
 
-# Hyperparameters
-num_classes = 23
-learning_rate = 0.001
-batch_size = 30  # Increased batch size
-num_epochs = 2  # Increased the number of epochs
+# Load your saved model
+model = tf.keras.models.load_model('6claass.h5')
 
-# Image transforms with data augmentation
-data_transforms = transforms.Compose([
-    transforms.Resize(256),
-    transforms.RandomResizedCrop(224),  # Random crop for data augmentation
-    transforms.RandomHorizontalFlip(),  # Random horizontal flip for data augmentation
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
+def preprocess_image(image_path):
+    img = cv2.imread(image_path)
+    img = cv2.resize(img, (180, 180))
+    img = np.array(img) / 255.0
+    img = vgg_model.predict(img.reshape(1, 180, 180, 3))
+    img = img.reshape(1, -1)
+    return img
 
-# Load data
-train_data = datasets.ImageFolder(train_dir, transform=data_transforms)
-test_data = datasets.ImageFolder(test_dir, transform=data_transforms)
+def predict_skin_disease(image_path):
+    img = preprocess_image(image_path)
+    pred = model.predict(img)[0]
+    predicted_class_index = np.argmax(pred)
+    predicted_class_name = class_names[predicted_class_index]
+    return predicted_class_name
 
-train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(test_data, batch_size=batch_size)
+# Example usage:
 
-# Create an instance of the ResNet model
-model = models.resnet50(pretrained=True)
-model.fc = nn.Linear(model.fc.in_features, num_classes)  # Modify the final fully connected layer
-
-# Define loss function and optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-
-# Learning rate scheduling
-from torch.optim.lr_scheduler import StepLR
-scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
-
-# Training loop
-for epoch in range(num_epochs):
-    model.train()
-    running_loss = 0.0
-
-    for images, labels in train_loader:
-        optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-        scheduler.step()  # Adjust learning rate
-
-        running_loss += loss.item()
-
-    print(f'Epoch {epoch + 1} - Loss: {running_loss / len(train_loader)}')
-
-print('Finished Training')
-
-# Save the trained model
-torch.save(model.state_dict(), 'skin_model.pth')
-
-# Validation
-model.eval()
-correct = 0
-total = 0
-
-with torch.no_grad():
-    for images, labels in test_loader:
-        outputs = model(images)
-        _, predicted = torch.max(outputs.data, 1)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
-
-print(f'Accuracy on the test set: {100 * correct / total}%')
