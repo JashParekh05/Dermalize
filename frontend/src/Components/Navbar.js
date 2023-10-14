@@ -1,17 +1,16 @@
-import React, { useState } from "react";
-import Logo from "../Website_Assets/Dermalize_Logo.png";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+// src/Navbar.js
 
+import React from 'react';
+import './Navbar.css'; // We'll create this CSS file for styling
 
 function Navbar() {
-
   return (
-    <div className="navbar">
-      <div className="leftSide">
-        <img src={Logo} />
-        </div>
-      <div className="rightSide"></div>
-      </div>
+    <nav className="navbar">
+      <ul className="nav-list">
+        <li className="nav-item"><a href="/">Home</a></li>
+        <li className="nav-item"><a href="/about">About</a></li>
+      </ul>
+    </nav>
   );
 }
 
