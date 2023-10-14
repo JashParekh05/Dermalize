@@ -34,6 +34,9 @@ def upload_image():
 
         return jsonify({'message': 'Image uploaded successfully'})
         print("hello is this working")
+        print("hello is this working")
+        print("hello is this working")
+
     return jsonify({'error': 'Unexpected error'})
 
 if __name__ == '__main__':
