@@ -36,6 +36,7 @@ def upload_image():
         print("hello is this working")
         print("hello is this working")
         print("hello is this working")
+        print("hello is this working")
 
     return jsonify({'error': 'Unexpected error'})
 

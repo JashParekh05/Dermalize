@@ -1,87 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Website</title>
-    <style>
-        body {
-            font-family: "Times New Roman", Times, serif;
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-        }
-        header {
-            font-family: "Times New Roman", Times, serif;
-            background-color: #333;
-            color: #fff;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-        }
-        header img {
-            width: 50px;
-            height: 50px;
-            margin-right: 10px;
-        }
-        nav {
-            font-family: "Times New Roman", Times, serif;
-            display: flex;
-            margin-left: auto;
-        }
-        nav a {
-            color: #DBBB84;
-            text-decoration: none;
-            padding: 10px;
-        }
-        nav a:hover {
-            background-color: #555;
-        }
-        .container {
-            font-family: "Times New Roman", Times, serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #000;
-        }
-        .centered-content {
-            font-family: "Times New Roman", Times, serif;
-            text-align: center;
-        }
-        h1 {
-            color: #DBBB84;
-        }
-        /* Style all buttons */
-        .btn {
-            font-family: "Times New Roman", Times, serif;
-            background-color: #DBBB84;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: #555;
-        }
-    </style>
+    <title>Image Upload</title>
 </head>
 <body>
-    <header>
-        <img src="your-logo.png" alt="Logo">
-        <nav>
-            <a href="#">Home</a>
-            <a href="about_us.html" target="_blank">About Us</a> <!-- Added target="_blank" to open in a new tab -->
-        </nav>
-    </header>
-    <div class="container">
-        <div class="centered-content">
-            <h1>Upload an Image</h1>
-            <form action="/upload" method="POST" enctype="multipart/form-data">
-                <label for="file" class="btn">Choose File</label>
-                <input type="file" id="file" name="file" accept="image/*" style="display: none;" required>
-                <button class="btn" type="submit">Upload</button>
-            </form>
-        </div>
-    </div>
+    <h1>Upload an Image</h1>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Upload</button>
+    </form>
 </body>
 </html>
