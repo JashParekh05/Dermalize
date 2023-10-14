@@ -33,6 +33,10 @@ def upload_image():
         file.save(file_path)
 
         return jsonify({'message': 'Image uploaded successfully'})
+        print("hello is this working")
+        print("hello is this working")
+        print("hello is this working")
+        print("hello is this working")
 
     return jsonify({'error': 'Unexpected error'})
 
