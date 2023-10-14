@@ -1,16 +1,40 @@
-# This is a sample Python script.
+import os
+from flask import Flask, render_template, request, jsonify
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+app = Flask(__name__)
 
+# Define the path to the "uploads" folder in your project directory
+uploads_folder = os.path.join(os.path.dirname(__file__), 'uploads')
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+# Ensure the "uploads" folder exists, create it if not
+if not os.path.exists(uploads_folder):
+    os.makedirs(uploads_folder)
 
+# Define a route to display the image upload form
+@app.route('/')
+def upload_form():
+    return render_template('upload.html')
 
-# Press the green button in the gutter to run the script.
+# Define a route to handle image uploads
+@app.route('/upload', methods=['POST'])
+def upload_image():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'})
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'})
+
+    if file:
+        # Save the uploaded image to the "uploads" folder
+        filename = file.filename
+        file_path = os.path.join(uploads_folder, filename)
+        file.save(file_path)
+
+        return jsonify({'message': 'Image uploaded successfully'})
+
+    return jsonify({'error': 'Unexpected error'})
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    app.run()
