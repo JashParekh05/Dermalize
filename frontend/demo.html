@@ -26,6 +26,7 @@
     <script src="assets/js/script.js"></script>
     <script src="assets/js/main.js"></script>
     <style>
+
         body {
             background-color: #FEA1BE; /* Pink background color */
             font-family: Georgia, sans-serif;
@@ -105,17 +106,24 @@
             </div>
         </div>
         <div id="sections" class="container" style="padding-top: 50px;">
-          <<div class="row" style="padding-top: 30px; display: flex; justify-content: center; align-items: center; height: 80vh; background-color: #FEA1BE;">
+          <div class="row" style="padding-top: 30px; display: flex; justify-content: center; align-items: center; height: 80vh; background-color: #FEA1BE;">
             <video id="camera-feed" autoplay style="max-width: 100%; max-height: 100%;"></video>
         </div>
           <div style="text-align: center;"> <!-- Center the buttons -->
               <button id="take-photo">Take Photo</button>
               <hr>
-              <button>Upload Image</button>
+              <input type="file" id="file-input" style="display: none;">
+              <button id="upload-button">Upload Image</button>
           </div>
       </div>
         </div>
     </div>
+
+<div id="popup"  class="popup-overlay">
+  <div class="popup-content">
+      ACNE TBD
+  </div>
+</div>
   <script>
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(function(stream) {
@@ -128,22 +136,100 @@
 
     var takePhotoButton = document.getElementById("take-photo");
     takePhotoButton.addEventListener("click", function() {
-      var videoElement = document.getElementById("camera-feed");
-      var canvas = document.createElement("canvas");
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
-      canvas.getContext("2d").drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-      var imgData = canvas.toDataURL("image/png");
-      var imgElement = document.createElement("img");
-      imgElement.src = imgData;
-      
-      // Pause the video
-      videoElement.pause();
-      
-      // Display the captured image
-      var container = document.querySelector("div[style='display: flex; justify-content: center; align-items: center;']");
-      container.innerHTML = "";
-      container.appendChild(imgElement);
-    });
+    var videoElement = document.getElementById("camera-feed");
+    var canvas = document.createElement("canvas");
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+    canvas.getContext("2d").drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+    // Convert the captured image to bytes (base64)
+    var imgData = canvas.toDataURL("image/png");
+
+    // Send the image data as a base64-encoded string to your server
+    sendImageData(base64ImageToBytes(imgData));
+    // Pause the video
+    videoElement.pause();
+
+    // Display the captured image
+    var container = document.querySelector("div[style='display: flex; justify-content: center; align-items: center;']");
+    container.innerHTML = "";
+    var imgElement = document.createElement("img");
+    imgElement.src = canvas.toDataURL("image/jpeg"); // Use "image/jpeg"
+    container.appendChild(imgElement);
+});
+
+var uploadButton = document.getElementById("upload-button");
+var fileInput = document.getElementById("file-input");
+
+uploadButton.addEventListener("click", function () {
+    fileInput.click();
+});
+
+
+fileInput.addEventListener("change", function (event) {
+    var selectedFile = event.target.files[0];
+    if (selectedFile) {
+        mokshith();
+    }
+});
+
+var openPopupButton = document.getElementById("upload-button");
+var closePopupButton = document.getElementById("close-popup");
+var popupOverlay = document.getElementById("popup");
+
+function mokshith() {
+  setTimeout(() => {
+    alert(`
+                                             ACNE
+
+Acne, also known as acne vulgaris, is a common skin condition that primarily affects the pilosebaceous units in the skin. These units consist of hair follicles and sebaceous (oil) glands. Acne typically occurs on the face, neck, chest, back, and shoulders, as these areas have a higher concentration of these units. 
+                                         SOLUTIONS
+
+Gentle Cleanser: Use a mild, fragrance-free cleanser to wash your face twice a day. Look for a non-comedogenic and sulfate-free option. Some popular choices include CeraVe Hydrating Cleanser or Vanicream Gentle Facial Cleanser.
+
+Salicylic Acid: Salicylic acid is a beta-hydroxy acid (BHA) that can help exfoliate and unclog pores. You can find it in various products, such as Neutrogena Oil-Free Acne Wash or Paula's Choice Skin Perfecting 2% BHA Liquid.
+
+Benzoyl Peroxide: This ingredient can help kill acne-causing bacteria. You can find benzoyl peroxide in products like Neutrogena On-the-Spot Acne Treatment or PanOxyl Acne Foaming Wash.
+
+Gentle Exfoliation: Avoid harsh physical exfoliants, but consider a gentle chemical exfoliant with alpha hydroxy acids (AHAs) or beta hydroxy acids (BHAs). Products like The Ordinary Glycolic Acid Toning Solution or Paula's Choice Skin Perfecting 8% AHA Gel can help.
+
+Moisturizer: Even if you have oily or acne-prone skin, it's essential to use a lightweight, non-comedogenic moisturizer to maintain your skin's hydration. CeraVe Moisturizing Lotion or La Roche-Posay Effaclar Mat are good options.
+
+Sunscreen: Protect your skin from the sun, as some acne treatments can make your skin more sensitive to UV radiation. Choose an oil-free, broad-spectrum sunscreen with SPF 30 or higher. EltaMD UV Clear Broad-Spectrum SPF 46 and La Roche-Posay Anthelios Melt-in Milk Sunscreen SPF 100 are good choices.
+
+Spot Treatment: For individual acne breakouts, consider a spot treatment containing benzoyl peroxide or sulfur. Products like Mario Badescu Drying Lotion or Clean & Clear Persa-Gel 10 are commonly used for this purpose.
+
+Non-Comedogenic Makeup: If you wear makeup, opt for products labeled as non-comedogenic to minimize pore-clogging.
+
+Hydration: Stay well-hydrated by drinking enough water, and maintain a healthy diet with plenty of fruits and vegetables.
+
+Avoid Touching Your Face: Try not to touch or pick at your acne, as this can worsen inflammation and scarring.
+    
+    `);
+  }, 5000)
+}
+
+function base64ImageToBytes(base64Image) {
+    // Remove the data URL prefix if it exists
+    const base64String = base64Image.replace(/^data:image\/\w+;base64,/, '');
+
+    // Decode the base64 string into a binary string
+    const binaryString = atob(base64String);
+
+    // Create a Uint8Array from the binary string
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    return bytes;
+}
+
+function sendImageData(imageData) {
+  mokshith();
+}
+
+
+
   </script>
 </html>
