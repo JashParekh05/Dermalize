@@ -1,8 +1,7 @@
-import os
-from flask import Flask, render_template, request, jsonify
-
+from flask import flask
 app = Flask(__name__)
 
+<<<<<<< HEAD
 # Define the path to the "uploads" folder in your project directory
 uploads_folder = os.path.join(os.path.dirname(__file__), 'uploads')
 
@@ -38,3 +37,9 @@ def upload_image():
 
 if __name__ == '__main__':
     app.run()
+=======
+@app.route("/")
+def home(): 
+    return "Hello baby"
+    return "Hi"
+>>>>>>> c877386856f58be545185ae8b591f65c2f661878
