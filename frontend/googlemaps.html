@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Find Nearest Dermatologist</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta property="og:url" content="https:/www.zebraprep.com">
+    <meta property="og:title" content="Zebra Prep">
+    <meta property="og:image" content="assets/images/math.jpg">
+    <meta property="og:description" content="Zebra Prep - Online classes to achieve success">
+    <link rel="icon" href="assets/images/favicon.webp" id="light-scheme-icon">
+    <link rel="icon" href="assets/images/favicon.webp" id="dark-scheme-icon">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="assets/css/styles.css"></link>
+    <link rel="stylesheet" href="modules/bootstrap.min.css">
+    <script src="modules/jquery.min.js"></script>
+    <script src="modules/bootstrap.min.js"></script>
+    <script src="modules/jquery-canvas-sparkles.js"></script>
+    <script src="modules/jquery-canvas-sparkles.min.js"></script>
+    <script src="modules/aos.js"></script>
+    <script src='modules/font-awesome.js'></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/main.js"></script>
+    <style>
+      #map {
+        height: 90vh;
+        width: 100%;
+      }
+    </style>
+    
+    <script>
+      let map;
+      let service;
+      let infowindow;
+
+      function initMap() {
+        infowindow = new google.maps.InfoWindow();
+        map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 12,
+        });
+
+        // Try to get the user's current location
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            const userLocation = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+
+            map.setCenter(userLocation);
+
+            const request = {
+              query: "dermatologist",
+              location: userLocation,
+              radius: 10000,
+            };
+
+            service = new google.maps.places.PlacesService(map);
+            service.textSearch(request, (results, status) => {
+              if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                for (let i = 0; i < 10; i++) {
+                  createMarker(results[i]);
+                }
+
+                
+              }
+            });
+          });
+        } else {
+          alert('Geolocation is not supported by your browser.');
+        }
+      }
+
+      function createMarker(place) {
+        if (!place.geometry || !place.geometry.location) return;
+
+        const marker = new google.maps.Marker({
+          map,
+          position: place.geometry.location,
+        });
+
+        google.maps.event.addListener(marker, "click", () => {
+          infowindow.setContent(place.name || "");
+          infowindow.open(map);
+        });
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzYS2k19MZbAaIMnulwaGDelOa0jg7Bac&libraries=places&callback=initMap" async defer></script>
+  </head>
+  <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-primary" style="background-color: #FEA1BE!important">
+    <div class="container-fluid">
+        <a style="margin-left: 1%;" class="navbar-brand"  href="/">
+        <img  src="assets/images/logo.png" alt="" style="zoom: 17%;" class="d-inline-block align-text-top">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ham" aria-controls="ham" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="ham">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link " aria-current="page" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" aria-current="page" href="/about.html">General</a>
+              </li>
+                <li class="nav-item">
+                  <a class="nav-link " aria-current="page" href="/demo.html">Try Now!</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link active" aria-current="page" href="/googlemaps.html">Find a Dermatologist</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+  </nav>
+  <body>
+    <div style="margin-top: 6%;" id="map"></div>
+  </body>
+</html>
