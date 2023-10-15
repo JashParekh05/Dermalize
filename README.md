@@ -1,4 +1,4 @@
-# Dermalize
+# Dermalyze
 HackGT Project October 2023
 Authors: Saahil Khanna, Rishi Bappanad, Mokshit Manuru, Jash Parekh 
 
