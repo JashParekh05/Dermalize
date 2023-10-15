@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import os
 import torch
 import torch.nn as nn
@@ -23,52 +24,100 @@ data_transforms = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
+=======
 
-# Load data
-train_data = datasets.ImageFolder(train_dir, transform=data_transforms)
-test_data = datasets.ImageFolder(test_dir, transform=data_transforms)
+# import the necessary packages
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.models import load_model
+import numpy as np
+import argparse
+import cv2
+import os
+from matplotlib import pyplot as plt
 
-train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(test_data, batch_size=batch_size)
 
-# Create an instance of the SkinNet model
-model = SkinNet(num_classes)
 
-# Define loss function and optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+prototxtPath = "/Users/jashparekh/Documents/GitHub/Dermalize/Backend/deploy.prototxt"
+weightsPath = "/Users/jashparekh/Documents/GitHub/Dermalize/Backend/res10_300x300_ssd_iter_140000.caffemodel"
+>>>>>>> Stashed changes
 
-# Training loop
-for epoch in range(num_epochs):
-    model.train()
-    running_loss = 0.0
+# load our serialized face detector model from disk
+print("[INFO] loading face detector model...")
+prototxtPath = os.path.sep.join(["face_detector", "deploy.prototxt"])
+weightsPath = os.path.sep.join(["face_detector",
+	"res10_300x300_ssd_iter_140000.caffemodel"])
+net = cv2.dnn.readNet(prototxtPath, weightsPath)
 
-    for images, labels in train_loader:
-        optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
+# load the face mask detector model from disk
+print("[INFO] loading face acne detector model...")
+model = load_model("/facemodel.model")
 
-        running_loss += loss.item()
+# load the input image from disk, clone it, and grab the image spatial
+# dimensions
+image = cv2.imread("images.jpg")
+orig = image.copy()
+(h, w) = image.shape[:2]
 
-    print(f'Epoch {epoch + 1} - Loss: {running_loss / len(train_loader)}')
+# construct a blob from the image
+blob = cv2.dnn.blobFromImage(image, 1.0, (300, 300),
+	(104.0, 177.0, 123.0))
 
-print('Finished Training')
+# pass the blob through the network and obtain the face detections
+print("[INFO] computing face detections...")
+net.setInput(blob)
+detections = net.forward()
 
-# Save the trained model
-torch.save(model.state_dict(), 'skin_model.pth')
+# loop over the detections
+for i in range(0, detections.shape[2]):
+	# extract the confidence (i.e., probability) associated with
+	# the detection
+	confidence = detections[0, 0, i, 2]
 
-# Validation
-model.eval()
-correct = 0
-total = 0
+	# filter out weak detections by ensuring the confidence is
+	# greater than the minimum confidence
+	if confidence > 0.5:
+		# compute the (x, y)-coordinates of the bounding box for
+		# the object
+		box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+		(startX, startY, endX, endY) = box.astype("int")
 
-with torch.no_grad():
-    for images, labels in test_loader:
-        outputs = model(images)
-        _, predicted = torch.max(outputs.data, 1)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
+		# ensure the bounding boxes fall within the dimensions of
+		# the frame
+		(startX, startY) = (max(0, startX), max(0, startY))
+		(endX, endY) = (min(w - 1, endX), min(h - 1, endY))
 
+		# extract the face ROI, convert it from BGR to RGB channel
+		# ordering, resize it to 224x224, and preprocess it
+		face = image[startY:endY, startX:endX]
+		face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
+		face = cv2.resize(face, (224, 224))
+		face = img_to_array(face)
+		face = preprocess_input(face)
+		face = np.expand_dims(face, axis=0)
+
+		# pass the face through the model to determine if the face
+		# has a acne or not
+		(acne, withoutAcne) = model.predict(face)[0]
+
+		# determine the class label and color we'll use to draw
+		# the bounding box and text
+		label = "Acne" if acne > withoutAcne else "No Acne"
+		color = (0, 0, 255) if label == "Acne" else (0, 255, 0)
+
+		# include the probability in the label
+		label = "{}: {:.2f}%".format(label, max(acne, withoutAcne) * 100)
+
+<<<<<<< Updated upstream
 print(f'Accuracy on the test set: {100 * correct / total}%')
+=======
+		# display the label and bounding box rectangle on the output
+		# frame
+		cv2.putText(image, label, (startX, startY - 10),
+			cv2.FONT_HERSHEY_SIMPLEX, 0.45, color, 2)
+		cv2.rectangle(image, (startX, startY), (endX, endY), color, 2)
+
+# show the output image
+plt.imshow((cv2.cvtColor(image, cv2.COLOR_BGR2RGB)))
+plt.show()
+>>>>>>> Stashed changes

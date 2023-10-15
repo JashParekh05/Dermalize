@@ -1,74 +1,28 @@
-import os
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader
-from torchvision import transforms, datasets
-from model import SkinNet  # Import the model from model.py
+import pandas as pd
 
-# Define data directories
-train_dir = '/Users/jashparekh/Documents/GitHub/Dermalize/Backend/dermnet/train'
-test_dir = '/Users/jashparekh/Documents/GitHub/Dermalize/Backend/dermnet/test'
+# Load your CSV file
+csv_file_path = '/Users/jashparekh/Documents/GitHub/Dermalize/Backend/dermnet/_annotations.csv'  # Replace with the path to your CSV file
+data = pd.read_csv(csv_file_path)
 
-# Hyperparameters
-num_classes = 23
-learning_rate = 0.001
-batch_size = 64
-num_epochs = 10
+# Examine the column names in your DataFrame
+print("Column names in your CSV file:")
+print(data.columns)
 
-# Image transforms
-data_transforms = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
+# Once you've identified the correct column name, replace 'your_column_name' below
+correct_column_name = 'class'  # Replace with the actual column name containing class labels
 
-# Load data
-train_data = datasets.ImageFolder(train_dir, transform=data_transforms)
-test_data = datasets.ImageFolder(test_dir, transform=data_transforms)
+# Create a mapping of unique class labels to numerical values
+label_mapping = {label: idx for idx, label in enumerate(data[correct_column_name].unique())}
 
-train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(test_data, batch_size=batch_size)
+# Apply label encoding to the DataFrame
+data['encoded_labels'] = data[correct_column_name].map(label_mapping)
 
-# Create an instance of the SkinNet model
-model = SkinNet(num_classes)
+# Save the updated data to a new CSV file
+updated_csv_file_path = '/Users/jashparekh/Documents/GitHub/Dermalize/Backend/dermnet/_annotations.csv'  # Replace with the path where you want to save the updated CSV
+data.to_csv(updated_csv_file_path, index=False)
 
-# Define loss function and optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+# Resulting DataFrame with encoded labels
+print(data)
 
-# Training loop
-for epoch in range(num_epochs):
-    model.train()
-    running_loss = 0.0
-
-    for images, labels in train_loader:
-        optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-
-        running_loss += loss.item()
-
-    print(f'Epoch {epoch + 1} - Loss: {running_loss / len(train_loader)}')
-
-print('Finished Training')
-
-# Save the trained model
-torch.save(model.state_dict(), 'skin_model.pth')
-
-# Validation
-model.eval()
-correct = 0
-total = 0
-
-with torch.no_grad():
-    for images, labels in test_loader:
-        outputs = model(images)
-        _, predicted = torch.max(outputs.data, 1)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
-
-print(f'Accuracy on the test set: {100 * correct / total}%')
+# Check the new CSV file for updated data
+print(f"Updated CSV file saved to {updated_csv_file_path}")
